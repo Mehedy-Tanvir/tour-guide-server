@@ -32,11 +32,15 @@ async function run() {
     const servicesCollection = database.collection("services");
     const bookingsCollection = database.collection("bookings");
 
-    // service related apis
+    // services related apis
     app.post("/services", async (req, res) => {
       const service = req.body;
       const result = await servicesCollection.insertOne(service);
-      res.send(service);
+      res.send(result);
+    });
+    app.get("/services", async (req, res) => {
+      const result = await servicesCollection.find().toArray();
+      res.send(result);
     });
 
     // db ping
