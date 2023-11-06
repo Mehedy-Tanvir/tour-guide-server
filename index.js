@@ -29,8 +29,15 @@ async function run() {
 
     const database = client.db("tourServicesDB");
 
-    const productsCollection = database.collection("products");
+    const servicesCollection = database.collection("services");
     const bookingsCollection = database.collection("bookings");
+
+    // service related apis
+    app.post("/services", async (req, res) => {
+      const service = req.body;
+      const result = await servicesCollection.insertOne(service);
+      res.send(service);
+    });
 
     // db ping
     await client.db("admin").command({ ping: 1 });
