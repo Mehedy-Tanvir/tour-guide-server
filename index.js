@@ -42,6 +42,12 @@ async function run() {
       const result = await servicesCollection.find().toArray();
       res.send(result);
     });
+    app.get("/myServices", async (req, res) => {
+      const myEmail = req.query.email;
+      const query = { providerEmail: myEmail };
+      const result = await servicesCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // db ping
     await client.db("admin").command({ ping: 1 });
