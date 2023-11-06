@@ -76,6 +76,13 @@ async function run() {
       );
       res.send(result);
     });
+    app.delete("/myService/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await servicesCollection.deleteOne(filter);
+
+      res.send(result);
+    });
 
     // db ping
     await client.db("admin").command({ ping: 1 });
