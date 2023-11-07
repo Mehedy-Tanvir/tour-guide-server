@@ -27,6 +27,23 @@ const verifyId = async (req, res, next) => {
   next();
 };
 
+// auth middlewares
+const verifyToken = async (req, res, next) => {
+  const token = req?.cookies?.token;
+
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
 app.get("/", (req, res) => {
   res.send("Tour guide server running");
 });
@@ -82,7 +99,7 @@ async function run() {
     });
 
     // services related apis
-    app.post("/services", async (req, res) => {
+    app.post("/services", verifyToken, async (req, res) => {
       try {
         const service = req.body;
         const result = await servicesCollection.insertOne(service);
@@ -99,8 +116,11 @@ async function run() {
         console.log(error);
       }
     });
-    app.get("/myServices", async (req, res) => {
+    app.get("/myServices", verifyToken, async (req, res) => {
       try {
+        if (req?.user?.email !== req?.query?.email) {
+          return res.status(403).send({ message: "Forbidden Access" });
+        }
         const myEmail = req.query.email;
         const query = { providerEmail: myEmail };
         const result = await servicesCollection.find(query).toArray();
@@ -109,7 +129,7 @@ async function run() {
         console.log(error);
       }
     });
-    app.get("/myService/:id", verifyId, async (req, res) => {
+    app.get("/myService/:id", verifyId, verifyToken, async (req, res) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
@@ -119,7 +139,7 @@ async function run() {
         console.log(error);
       }
     });
-    app.put("/myService/:id", verifyId, async (req, res) => {
+    app.put("/myService/:id", verifyId, verifyToken, async (req, res) => {
       try {
         const id = req.params.id;
         const filter = { _id: new ObjectId(id) };
@@ -145,7 +165,7 @@ async function run() {
         console.log(error);
       }
     });
-    app.delete("/myService/:id", verifyId, async (req, res) => {
+    app.delete("/myService/:id", verifyId, verifyToken, async (req, res) => {
       try {
         const id = req.params.id;
         const filter = { _id: new ObjectId(id) };
@@ -157,7 +177,7 @@ async function run() {
       }
     });
 
-    app.get("/serviceDetails/:id", verifyId, async (req, res) => {
+    app.get("/serviceDetails/:id", verifyId, verifyToken, async (req, res) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
@@ -169,7 +189,7 @@ async function run() {
     });
 
     // bookings related api
-    app.post("/bookings", async (req, res) => {
+    app.post("/bookings", verifyToken, async (req, res) => {
       try {
         const booking = req.body;
         const result = await bookingsCollection.insertOne(booking);
@@ -178,8 +198,11 @@ async function run() {
         console.log(error);
       }
     });
-    app.get("/myBookings", async (req, res) => {
+    app.get("/myBookings", verifyToken, async (req, res) => {
       try {
+        if (req?.user?.email !== req?.query?.email) {
+          return res.status(403).send({ message: "Forbidden Access" });
+        }
         const myEmail = req.query.email;
         const query = { bookerEmail: myEmail };
         const result = await bookingsCollection.find(query).toArray();
@@ -188,8 +211,11 @@ async function run() {
         console.log(error);
       }
     });
-    app.get("/myPendingWorks", async (req, res) => {
+    app.get("/myPendingWorks", verifyToken, async (req, res) => {
       try {
+        if (req?.user?.email !== req?.query?.email) {
+          return res.status(403).send({ message: "Forbidden Access" });
+        }
         const myEmail = req.query.email;
         const query = { providerEmail: myEmail };
         const result = await bookingsCollection.find(query).toArray();
@@ -198,7 +224,7 @@ async function run() {
         console.log(error);
       }
     });
-    app.patch("/updateStatus/:id", verifyId, async (req, res) => {
+    app.patch("/updateStatus/:id", verifyId, verifyToken, async (req, res) => {
       const id = req.params.id;
       const { status } = req.body;
       try {
