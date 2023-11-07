@@ -16,6 +16,17 @@ app.use(
   })
 );
 app.use(cookieParser());
+
+// my middlewares
+const verifyId = async (req, res, next) => {
+  const id = req.params.id;
+  const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+  if (!isValidObjectId) {
+    return res.status(404).send({ error: "invalid id" });
+  }
+  next();
+};
+
 app.get("/", (req, res) => {
   res.send("Tour guide server running");
 });
@@ -72,82 +83,122 @@ async function run() {
 
     // services related apis
     app.post("/services", async (req, res) => {
-      const service = req.body;
-      const result = await servicesCollection.insertOne(service);
-      res.send(result);
+      try {
+        const service = req.body;
+        const result = await servicesCollection.insertOne(service);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
     app.get("/services", async (req, res) => {
-      const result = await servicesCollection.find().toArray();
-      res.send(result);
+      try {
+        const result = await servicesCollection.find().toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
     app.get("/myServices", async (req, res) => {
-      const myEmail = req.query.email;
-      const query = { providerEmail: myEmail };
-      const result = await servicesCollection.find(query).toArray();
-      res.send(result);
+      try {
+        const myEmail = req.query.email;
+        const query = { providerEmail: myEmail };
+        const result = await servicesCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
-    app.get("/myService/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await servicesCollection.findOne(query);
-      res.send(result);
+    app.get("/myService/:id", verifyId, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await servicesCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
-    app.put("/myService/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const { serviceName, serviceImage, serviceArea, price, description } =
-        req.body;
-      const options = { upsert: true };
-      const updateService = {
-        $set: {
-          serviceName,
-          serviceImage,
-          serviceArea,
-          price,
-          description,
-        },
-      };
-      const result = await servicesCollection.updateOne(
-        filter,
-        updateService,
-        options
-      );
-      res.send(result);
+    app.put("/myService/:id", verifyId, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const { serviceName, serviceImage, serviceArea, price, description } =
+          req.body;
+        const options = { upsert: true };
+        const updateService = {
+          $set: {
+            serviceName,
+            serviceImage,
+            serviceArea,
+            price,
+            description,
+          },
+        };
+        const result = await servicesCollection.updateOne(
+          filter,
+          updateService,
+          options
+        );
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
-    app.delete("/myService/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const result = await servicesCollection.deleteOne(filter);
+    app.delete("/myService/:id", verifyId, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const result = await servicesCollection.deleteOne(filter);
 
-      res.send(result);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
-    app.get("/serviceDetails/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await servicesCollection.findOne(query);
-      res.send(result);
+    app.get("/serviceDetails/:id", verifyId, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await servicesCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     // bookings related api
     app.post("/bookings", async (req, res) => {
-      const booking = req.body;
-      const result = await bookingsCollection.insertOne(booking);
-      res.send(result);
+      try {
+        const booking = req.body;
+        const result = await bookingsCollection.insertOne(booking);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
     app.get("/myBookings", async (req, res) => {
-      const myEmail = req.query.email;
-      const query = { bookerEmail: myEmail };
-      const result = await bookingsCollection.find(query).toArray();
-      res.send(result);
+      try {
+        const myEmail = req.query.email;
+        const query = { bookerEmail: myEmail };
+        const result = await bookingsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
     app.get("/myPendingWorks", async (req, res) => {
-      const myEmail = req.query.email;
-      const query = { providerEmail: myEmail };
-      const result = await bookingsCollection.find(query).toArray();
-      res.send(result);
+      try {
+        const myEmail = req.query.email;
+        const query = { providerEmail: myEmail };
+        const result = await bookingsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
-    app.patch("/updateStatus/:id", async (req, res) => {
+    app.patch("/updateStatus/:id", verifyId, async (req, res) => {
       const id = req.params.id;
       const { status } = req.body;
       try {
