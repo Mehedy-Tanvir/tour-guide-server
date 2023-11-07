@@ -84,6 +84,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/serviceDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await servicesCollection.findOne(query);
+      res.send(result);
+    });
+
     // db ping
     await client.db("admin").command({ ping: 1 });
     console.log(
