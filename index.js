@@ -90,9 +90,17 @@ async function run() {
       const result = await servicesCollection.findOne(query);
       res.send(result);
     });
+
+    // bookings related api
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
       const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
+    app.get("/mybookings", async (req, res) => {
+      const myEmail = req.query.email;
+      const query = { bookerEmail: myEmail };
+      const result = await bookingsCollection.find(query).toArray();
       res.send(result);
     });
 
