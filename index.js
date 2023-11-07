@@ -97,9 +97,15 @@ async function run() {
       const result = await bookingsCollection.insertOne(booking);
       res.send(result);
     });
-    app.get("/mybookings", async (req, res) => {
+    app.get("/myBookings", async (req, res) => {
       const myEmail = req.query.email;
       const query = { bookerEmail: myEmail };
+      const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/myPendingWorks", async (req, res) => {
+      const myEmail = req.query.email;
+      const query = { providerEmail: myEmail };
       const result = await bookingsCollection.find(query).toArray();
       res.send(result);
     });
