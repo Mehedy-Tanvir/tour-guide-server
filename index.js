@@ -90,6 +90,11 @@ async function run() {
       const result = await servicesCollection.findOne(query);
       res.send(result);
     });
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
 
     // db ping
     await client.db("admin").command({ ping: 1 });
