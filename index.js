@@ -1,13 +1,21 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 3000;
 
 // middlewares
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("Tour guide server running");
 });
@@ -31,6 +39,36 @@ async function run() {
 
     const servicesCollection = database.collection("services");
     const bookingsCollection = database.collection("bookings");
+
+    // auth related api
+    app.post("/jwt", async (req, res) => {
+      try {
+        const user = req.body;
+        const token = jwt.sign(
+          {
+            email: user.email,
+          },
+          process.env.ACCESS_TOKEN_SECRET,
+          { expiresIn: "10h" }
+        );
+        res
+          .cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+          })
+          .send({ success: true });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    app.post("/logout", async (req, res) => {
+      try {
+        res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+      } catch (error) {
+        console.log(error);
+      }
+    });
 
     // services related apis
     app.post("/services", async (req, res) => {
