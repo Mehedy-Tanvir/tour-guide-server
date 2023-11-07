@@ -109,6 +109,29 @@ async function run() {
       const result = await bookingsCollection.find(query).toArray();
       res.send(result);
     });
+    app.patch("/updateStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      try {
+        const result = await bookingsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $set: {
+              status,
+            },
+          }
+        );
+
+        if (result.matchedCount === 1) {
+          res.json({ message: "Status updated successfully" });
+        } else {
+          res.status(404).json({ message: "Booking not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
 
     // db ping
     await client.db("admin").command({ ping: 1 });
