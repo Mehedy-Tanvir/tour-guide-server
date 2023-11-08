@@ -85,8 +85,8 @@ async function run() {
         res
           .cookie("token", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            secure: process.env.NODE_ENV === "production" ? true : false,
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
           })
           .send({ success: true });
       } catch (error) {
@@ -95,7 +95,13 @@ async function run() {
     });
     app.post("/logout", async (req, res) => {
       try {
-        res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+        res
+          .clearCookie("token", {
+            maxAge: 0,
+            secure: process.env.NODE_ENV === "production" ? true : false,
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+          })
+          .send({ success: true });
       } catch (error) {
         console.log(error);
       }
