@@ -116,6 +116,16 @@ async function run() {
         console.log(error);
       }
     });
+    app.get("/otherServices", verifyToken, async (req, res) => {
+      try {
+        const providerEmail = req.query.email;
+        const query = { providerEmail };
+        const result = await servicesCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
     app.get("/myServices", verifyToken, async (req, res) => {
       try {
         if (req?.user?.email !== req?.query?.email) {
