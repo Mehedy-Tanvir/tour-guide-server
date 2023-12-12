@@ -50,6 +50,7 @@ const verifyToken = async (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("Tour guide server running");
 });
+
 // console.log(process.env.DB_USER, process.env.DB_PASSWORD);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster1.vnja0wm.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -70,6 +71,7 @@ async function run() {
 
     const servicesCollection = database.collection("services");
     const bookingsCollection = database.collection("bookings");
+    const subscriptionCollection = database.collection("subscriptions");
 
     // auth related api
     app.post("/jwt", async (req, res) => {
@@ -102,6 +104,17 @@ async function run() {
             sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
           })
           .send({ success: true });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    // subscribe related api
+    app.post("/subscribe", verifyToken, async (req, res) => {
+      try {
+        const email = req.body;
+        const result = await subscriptionCollection.insertOne(email);
+        res.send(result);
       } catch (error) {
         console.log(error);
       }
