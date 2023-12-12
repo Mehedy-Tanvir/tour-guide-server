@@ -110,7 +110,7 @@ async function run() {
     });
 
     // subscribe related api
-    app.post("/subscribe", verifyToken, async (req, res) => {
+    app.post("/subscribe", async (req, res) => {
       try {
         const email = req.body;
         const result = await subscriptionCollection.insertOne(email);
